@@ -150,3 +150,17 @@ func (v *Vault) Delete(ctx context.Context, name string) error {
 	}
 	return nil
 }
+
+// RecordUse writes one audit row. requestURL is the URL being fetched, NOT any
+// part of the credential bundle. outcome is one of "ok", "not_found",
+// "decrypt_failed", "apply_failed".
+func (v *Vault) RecordUse(ctx context.Context, name, requestURL, outcome string) error {
+	_, err := v.db.ExecContext(ctx, `
+		INSERT INTO credential_audit (name, used_at, request_url, outcome)
+		VALUES (?, ?, ?, ?)`,
+		name, time.Now().Unix(), requestURL, outcome)
+	if err != nil {
+		return fmt.Errorf("insert audit: %w", err)
+	}
+	return nil
+}
