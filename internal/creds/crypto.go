@@ -57,6 +57,9 @@ var ErrDecryptFailed = errors.New("creds: decryption failed")
 // decrypt opens ciphertext sealed by encrypt. Returns ErrDecryptFailed on any
 // authentication failure (wrong key, tampered ciphertext, wrong nonce).
 func decrypt(key, nonce, ciphertext []byte) ([]byte, error) {
+	if len(nonce) != nonceLen {
+		return nil, fmt.Errorf("creds: nonce length %d, want %d", len(nonce), nonceLen)
+	}
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, fmt.Errorf("aes new: %w", err)

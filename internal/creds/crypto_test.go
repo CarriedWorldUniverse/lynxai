@@ -2,6 +2,7 @@ package creds
 
 import (
 	"bytes"
+	"errors"
 	"testing"
 )
 
@@ -56,8 +57,25 @@ func TestDecrypt_WrongKeyFails(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := decrypt(bad, nonce, ct); err == nil {
-		t.Fatal("decrypt with wrong key should fail")
+	if _, err := decrypt(bad, nonce, ct); !errors.Is(err, ErrDecryptFailed) {
+		t.Fatalf("want ErrDecryptFailed, got %v", err)
+	}
+}
+
+func TestDecrypt_BadNonceLength(t *testing.T) {
+	key := deriveKey([]byte("master-key-32-bytes-padded-test!"))
+	ct, _, err := encrypt(key, []byte("hello"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Pass a too-short nonce — should error with non-ErrDecryptFailed so callers
+	// can distinguish a data-integrity bug from a real auth failure.
+	_, err = decrypt(key, []byte{1, 2, 3}, ct)
+	if err == nil {
+		t.Fatal("expected error for bad nonce length")
+	}
+	if errors.Is(err, ErrDecryptFailed) {
+		t.Fatalf("nonce-length error should NOT be ErrDecryptFailed (callers need to distinguish): %v", err)
 	}
 }
 
