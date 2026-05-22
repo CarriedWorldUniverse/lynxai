@@ -16,7 +16,7 @@ func main() {
 	}
 	switch os.Args[1] {
 	case "serve":
-		fmt.Println("serve: not yet implemented")
+		fmt.Fprintln(os.Stderr, "serve: not yet implemented")
 		os.Exit(1)
 	case "-h", "--help", "help":
 		usage()
