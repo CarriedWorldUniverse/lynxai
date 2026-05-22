@@ -542,6 +542,25 @@ Each will be its own design doc when its turn comes. v1's job is to make sure
 the engine, creds, and extract boxes have boundaries clean enough that those
 specs add new packages and endpoints rather than rewriting these ones.
 
+## Community: parallel lynx fork
+
+Separately from the lynxai repo, we maintain a fork of upstream lynx at
+`github.com/CarriedWorldUniverse/lynx`. **This repo does not share code with
+lynxai** (different language, different license, different scope) — it exists
+so we can be good citizens in the lynx community: accumulate patches for bugs
+and security holes we encounter or care about, send them upstream as PRs, and
+keep the fork in sync with `lynx-dev` so contributors have an easy starting
+point.
+
+The naming connection (lynxai ← lynx) is honored by community engagement, not
+by a code dependency. lynxai is the modern-web AI substrate; the lynx fork is
+where we contribute back to the 25-year-old text browser we took the name and
+the `-dump` design philosophy from.
+
+Not v1 scope to set up (it's a separate repo and a separate workflow), but
+worth noting in the spec so the relationship is explicit and doesn't get
+mistaken for "lynxai is a fork of lynx" later.
+
 ## Open questions (none blocking v1)
 
 - Master-key rotation story — not v1, but should be designed before the vault
