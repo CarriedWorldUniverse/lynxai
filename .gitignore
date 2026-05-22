@@ -1,1 +1,15 @@
-lynxai/
+# Binaries
+/lynxai
+/lynxai.exe
+/dist/
+
+# Local dev
+*.db
+*.db-journal
+master.key
+.lynxai/
+
+# Editor
+.idea/
+.vscode/
+.DS_Store
