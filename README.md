@@ -83,6 +83,20 @@ Supported credential kinds (v1): `basic`, `bearer`, `cookies`, `form`.
 - Bundle data never leaves the server: clients reference credentials by name only on `/fetch` and `/extract`.
 - Every credential use writes an audit row (name, request URL, outcome) — bundle contents are never logged.
 
+## Documentation
+
+For self-hosters and integrators:
+
+- [Quickstart](docs/usage/quickstart.md) — install, first request, first extract
+- [API Reference](docs/usage/api.md) — all endpoints, schemas, error codes
+- [Credentials](docs/usage/credentials.md) — the four credential kinds, bundle shapes, audit log
+- [Operations](docs/usage/operations.md) — flags, env vars, backup, security stance, limits
+
+For contributors / curious readers:
+
+- [Design Spec](docs/superpowers/specs/2026-05-22-lynxai-v1-design.md)
+- [v1 Implementation Plan](docs/superpowers/plans/2026-05-22-lynxai-v1-implementation.md)
+
 ## License
 
 AGPL-3.0-or-later. See [`LICENSE`](LICENSE).

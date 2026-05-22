@@ -1,0 +1,62 @@
+site_name: lynxai
+site_description: Self-hostable, AI-native headless browser
+site_url: https://carriedworlduniverse.github.io/lynxai/
+repo_url: https://github.com/CarriedWorldUniverse/lynxai
+repo_name: CarriedWorldUniverse/lynxai
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - toc.follow
+  palette:
+    - media: '(prefers-color-scheme: dark)'
+      scheme: slate
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+    - media: '(prefers-color-scheme: light)'
+      scheme: default
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+  icon:
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - tables
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+
+nav:
+  - Home: index.md
+  - Quickstart: usage/quickstart.md
+  - API Reference: usage/api.md
+  - Credentials: usage/credentials.md
+  - Operations: usage/operations.md
+  - Design Spec: superpowers/specs/2026-05-22-lynxai-v1-design.md
+  - Implementation Plan: superpowers/plans/2026-05-22-lynxai-v1-implementation.md
