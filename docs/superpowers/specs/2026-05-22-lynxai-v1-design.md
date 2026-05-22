@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-22
 **Status:** Draft for review
-**License:** Apache-2.0
+**License:** AGPL-3.0-or-later
 **Language:** Go (single static binary)
 **Repo:** `github.com/CarriedWorldUniverse/lynxai`
 **Depends on:** [`bridle`](https://github.com/CarriedWorldUniverse/bridle) (LLM harness — provider abstraction, tool calling, streaming)
@@ -178,7 +178,7 @@ internal/engine/               # chromedp wrapper, render to markdown
 internal/extract/              # schema-driven extraction via bridle
 internal/creds/                # encrypted SQLite vault, bundle validators, audit
 docs/superpowers/specs/        # design specs (this file)
-LICENSE                        # Apache-2.0
+LICENSE                        # AGPL-3.0-or-later
 README.md                      # project overview, install, quickstart
 go.mod / go.sum
 ```
@@ -541,6 +541,26 @@ These items are explicitly **not in v1** and have their own future specs:
 Each will be its own design doc when its turn comes. v1's job is to make sure
 the engine, creds, and extract boxes have boundaries clean enough that those
 specs add new packages and endpoints rather than rewriting these ones.
+
+## License rationale (AGPL-3.0-or-later)
+
+Two intents drove the choice:
+
+1. **Honor the lynx heritage.** Lynx is GPL-2.0; using its name and design
+   philosophy without matching the copyleft spirit would be poor form, even
+   though we don't share code. AGPL is in the GPL family.
+2. **Close the SaaS loophole.** GPL-3.0 still lets a fork run lynxai as a paid
+   hosted service without publishing modifications. AGPL-3.0's network-service
+   clause requires anyone running modified lynxai over a network to make their
+   source available to users of that service. That's the protection that
+   actually prevents a "free Browserbase clone, but commercial fork stays
+   closed" outcome.
+
+Self-hosters (the target audience) are unaffected. Anyone *redistributing* or
+*running lynxai as a service* must comply with AGPL. Note: this means lynxai
+code cannot be linked into lynx itself (lynx is GPL-2.0-only, incompatible
+with AGPL-3.0); the parallel lynx fork remains GPL-2.0 — patches flow one way,
+from us to lynx, not vice versa.
 
 ## Community: parallel lynx fork
 
