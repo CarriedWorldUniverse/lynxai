@@ -36,6 +36,31 @@ bridle config to use `claude-api`, local `ollama`, or any other bridle
 provider. This also keeps the Docker quickstart story to one env var
 (`LYNXAI_LLM_API_KEY`) — drop in a DeepSeek key, you're running.
 
+### The lynx framing
+
+`lynxai` is, in one sentence: **what if `lynx -dump` was an HTTP service backed
+by real Chromium, with an encrypted credential vault and an LLM extractor
+stapled on, designed for agents instead of humans.**
+
+The lineage is direct. For 25+ years `lynx -dump URL` has been the simplest way
+to turn a web page into clean text — exactly the shape LLM agents want. lynx's
+limits are well-known: no JavaScript, no CSS, no images, no modern web. Any
+SPA is a blank page; any cookie-walled dashboard requires interactive prompts;
+any auth beyond Basic/Digest is awkward.
+
+lynxai keeps what lynx got right (text-first output, scriptable, terminal-rooted,
+forms/cookies/auth as first-class concepts) and replaces what's missing:
+
+- **Real renderer** — Chromium via CDP, so SPAs and JS-heavy pages work
+- **Stored credentials** — encrypted vault with basic/bearer/cookies/form-login,
+  instead of lynx's interactive cookie prompts and `.netrc`
+- **Structured extraction** — LLM-driven JSON output against a schema, not
+  just text dumps
+- **Service shape** — an HTTP server (and Docker image) agents can call,
+  rather than a CLI a human drives
+
+### v1 scope
+
 This document specifies **v1 only**. v1 is deliberately minimal: enough to be
 useful for the most common agent task (fetch a page, optionally authenticated,
 optionally extract structured data) and no more. The rest is scoped on top in
