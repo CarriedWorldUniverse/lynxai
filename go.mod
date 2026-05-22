@@ -9,6 +9,7 @@ require (
 	github.com/ncruces/go-sqlite3 v0.34.2
 	golang.org/x/crypto v0.52.0
 	golang.org/x/net v0.54.0
+	golang.org/x/sync v0.20.0
 )
 
 require (

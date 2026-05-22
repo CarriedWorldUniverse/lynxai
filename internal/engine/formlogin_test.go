@@ -5,7 +5,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"testing"
+	"time"
 )
 
 func TestFormLogin_Success(t *testing.T) {
@@ -94,5 +97,50 @@ func TestFormLogin_FailureNoCookie(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "sessionid") {
 		t.Errorf("error should mention missing cookie: %v", err)
+	}
+}
+
+func TestFormLogin_ConcurrentFirstLoginDedups(t *testing.T) {
+	var (
+		hits int32
+		gate = make(chan struct{}) // ensure all goroutines pile up before server unblocks
+	)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt32(&hits, 1)
+		<-gate
+		http.SetCookie(w, &http.Cookie{Name: "sessionid", Value: "v", Path: "/"})
+		w.WriteHeader(200)
+	}))
+	defer srv.Close()
+
+	cache := NewFormLoginCache()
+	cfg := FormLoginConfig{
+		LoginURL: srv.URL, Method: "POST",
+		UserField: "u", PassField: "p", User: "a", Password: "b",
+		SuccessCookieName: "sessionid",
+	}
+
+	const N = 10
+	var wg sync.WaitGroup
+	wg.Add(N)
+	errCh := make(chan error, N)
+	for i := 0; i < N; i++ {
+		go func() {
+			defer wg.Done()
+			if _, err := cache.Login(context.Background(), "concurrent-key", cfg); err != nil {
+				errCh <- err
+			}
+		}()
+	}
+	// Small delay to ensure goroutines have arrived at the singleflight gate.
+	time.Sleep(50 * time.Millisecond)
+	close(gate)
+	wg.Wait()
+	close(errCh)
+	for err := range errCh {
+		t.Fatalf("login error: %v", err)
+	}
+	if got := atomic.LoadInt32(&hits); got != 1 {
+		t.Fatalf("server saw %d login POSTs under concurrent first-login; want 1", got)
 	}
 }
