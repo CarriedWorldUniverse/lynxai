@@ -28,8 +28,12 @@ func putCredentialHandler(d Deps) http.HandlerFunc {
 			WriteError(w, ErrCodeBadRequest, "name, kind, host, bundle all required", nil)
 			return
 		}
-		if err := d.Vault.Put(r.Context(), body.Name, body.Kind, body.Host, []byte(body.Bundle)); err != nil {
+		if err := creds.ValidateBundle(body.Kind, []byte(body.Bundle)); err != nil {
 			WriteError(w, ErrCodeBadRequest, err.Error(), nil)
+			return
+		}
+		if err := d.Vault.Put(r.Context(), body.Name, body.Kind, body.Host, []byte(body.Bundle)); err != nil {
+			WriteError(w, ErrCodeInternal, err.Error(), nil)
 			return
 		}
 		w.WriteHeader(http.StatusCreated)

@@ -72,6 +72,32 @@ func TestCredentialsGet_NotFound(t *testing.T) {
 	}
 }
 
+// TestCredentialsPut_ValidationVsStorageErrors documents the error-code
+// classification: bad bundle → 400 (bad_request), Vault failure → 500 (internal).
+// We can't easily trigger a DB error here, but at minimum verify that an
+// invalid bundle produces 400 with the bad_request code (not internal_error).
+func TestCredentialsPut_InvalidBundle_HasBadRequestCode(t *testing.T) {
+	h, _ := newTestServer(t)
+	body := bytes.NewBufferString(`{"name":"x","kind":"bearer","host":"y","bundle":{}}`)
+	req := httptest.NewRequest("POST", "/credentials", body)
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, req)
+	if w.Code != 400 {
+		t.Fatalf("status=%d body=%s", w.Code, w.Body)
+	}
+	var got struct {
+		Error struct {
+			Code string `json:"code"`
+		} `json:"error"`
+	}
+	if err := json.NewDecoder(w.Body).Decode(&got); err != nil {
+		t.Fatal(err)
+	}
+	if got.Error.Code != "bad_request" {
+		t.Errorf("code=%q want bad_request", got.Error.Code)
+	}
+}
+
 func TestCredentialsDelete(t *testing.T) {
 	h, v := newTestServer(t)
 	_ = v.Put(context.Background(), "to-delete", creds.KindBearer, "x", []byte(`{"host":"x","token":"t"}`))
