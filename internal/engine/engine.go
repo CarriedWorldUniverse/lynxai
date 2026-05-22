@@ -48,10 +48,10 @@ type CredCookie struct {
 
 // FetchResult is the response.
 type FetchResult struct {
-	Markdown string
-	Status   int
-	FinalURL string
-	Title    string
+	Markdown string `json:"markdown"`
+	Status   int    `json:"status"`
+	FinalURL string `json:"final_url"`
+	Title    string `json:"title"`
 }
 
 // Engine owns the chromedp allocator and runs fetches.

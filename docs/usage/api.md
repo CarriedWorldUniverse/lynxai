@@ -182,21 +182,21 @@ Navigate to a URL with a headless Chromium instance and return the page as clean
 
 ```json
 {
-  "Markdown": "# Example Domain\n\nThis domain is for use in illustrative examples...",
-  "Status": 200,
-  "FinalURL": "https://example.com/",
-  "Title": "Example Domain"
+  "markdown": "# Example Domain\n\nThis domain is for use in illustrative examples...",
+  "status": 200,
+  "final_url": "https://example.com/",
+  "title": "Example Domain"
 }
 ```
 
 | Field      | Type    | Description                                                                          |
 |------------|---------|--------------------------------------------------------------------------------------|
-| `Markdown` | string  | Cleaned (or raw, with `include_chrome`) markdown rendering of the page.              |
-| `Status`   | integer | HTTP status of the page. **v1 limitation: always `200` on successful navigation.**   |
-| `FinalURL` | string  | Final URL after any redirects.                                                       |
-| `Title`    | string  | The `<title>` of the rendered page.                                                  |
+| `markdown`  | string  | Cleaned (or raw, with `include_chrome`) markdown rendering of the page.             |
+| `status`    | integer | HTTP status of the page. **v1 limitation: always `200` on successful navigation.**  |
+| `final_url` | string  | Final URL after any redirects.                                                      |
+| `title`     | string  | The `<title>` of the rendered page.                                                 |
 
-!!! warning "v1: `Status` is hardcoded to 200"
+!!! warning "v1: `status` is hardcoded to 200"
     `chromedp.Navigate` doesn't readily surface the HTTP status, so the engine returns `200` for any navigation that didn't error out. Capturing the real status via a network listener is planned for v1.1.
 
 ### Examples
