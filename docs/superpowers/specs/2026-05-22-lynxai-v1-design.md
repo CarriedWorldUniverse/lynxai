@@ -4,7 +4,8 @@
 **Status:** Draft for review
 **License:** Apache-2.0
 **Language:** Go (single static binary)
-**Depends on:** `bridle` (LLM harness — provider abstraction, tool calling, streaming; import path TBD when bridle's module path is finalized)
+**Repo:** `github.com/CarriedWorldUniverse/lynxai`
+**Depends on:** [`bridle`](https://github.com/CarriedWorldUniverse/bridle) (LLM harness — provider abstraction, tool calling, streaming)
 
 ## Summary
 
@@ -314,8 +315,8 @@ type Vault interface {
 
 ### bridle dependency (external)
 
-bridle is imported as a Go module (exact module path TBD). lynxai uses
-exactly one function from it:
+bridle is imported as a Go module (`github.com/CarriedWorldUniverse/bridle`).
+lynxai uses exactly one function from it:
 
 ```go
 func (h *Harness) RunTurn(ctx context.Context, req TurnRequest, sink EventSink) (TurnResult, error)
