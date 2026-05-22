@@ -7,6 +7,31 @@
 **Repo:** `github.com/CarriedWorldUniverse/lynxai`
 **Depends on:** [`bridle`](https://github.com/CarriedWorldUniverse/bridle) (LLM harness — provider abstraction, tool calling, streaming)
 
+## Motivation
+
+In real developer environments, an AI agent's effective reach is bounded by
+the integrations available to it: APIs with service accounts, MCPs, SDKs.
+But the human developer has a *much* larger surface — every SaaS tool they
+log into via a browser. Jira admin panels, AWS Console, GitHub settings,
+internal company dashboards, payment processors, vendor portals, anything
+behind SSO. Most of these either have no API, have an API the developer
+hasn't provisioned auth for, or have an API where standing up an MCP for a
+one-off task is overkill.
+
+**lynxai is the access layer for AI agents in those tools.** Where the only
+available door is the human's browser session, lynxai opens it: it stores the
+credentials the developer already has (cookies, session tokens, form logins),
+drives a real Chromium against the real site, and returns text or structured
+data the agent can act on. For multi-step flows — "rotate this API key",
+"download last month's invoice", "approve this PR comment" — lynxai is the
+substrate a higher-level agent (over ACP, MCP, or bridle) browses through.
+
+The bootstrapping case is the most interesting one: an agent uses lynxai to
+drive a browser to *obtain* an API key from a vendor's UI, lynxai stores the
+key in its vault, and from then on the agent can call the vendor's API
+directly. The expensive browser-driven bootstrap runs once; cheap direct API
+calls run forever after.
+
 ## Summary
 
 `lynxai` is a self-hostable, open-source, AI-native headless browser. It is a free
