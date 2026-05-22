@@ -518,14 +518,41 @@ These items are explicitly **not in v1** and have their own future specs:
   as credential `jira-prod`." A multi-page click-and-extract task that a
   one-shot LLM call can't do but a real agent loop handles cleanly.
 
-  *Front-end options to evaluate in that spec:* (a) in-process bridle
-  multi-step turn (`MaxSteps > 1`) — same dependency as v1, no new processes;
-  (b) ACP to an external agent (Claude Code, Gemini CLI) over PTY/JSON-RPC —
-  reuses a mature agent loop, pluggable across agent vendors, but adds a
-  subprocess and a subscription-style auth surface to the deployment story.
-  Both are viable; the choice depends on whether operators want a
-  zero-subprocess deployment (favor bridle) or an agent-portable one
-  (favor ACP). May ship both.
+  *Front-end options to evaluate in that spec, ordered by current preference:*
+
+  1. **Headless Claude Code via bridle's `claudecode` provider (recommended
+     default when available).** `claude -p` subprocess driven by bridle.
+     Short-lived session per drive call (typical lifetime 30–90 s for the
+     bootstrap-then-done pattern). lynxai's actions are passed in as
+     `bridle.ToolDef`s — no MCP indirection, no `tools/list_changed` plumbing,
+     full agent loop, cache invalidation is moot because the session doesn't
+     outlive the task. This is the primary path because most of our own usage
+     is headless Claude behind the scenes, and the bridle integration already
+     exists.
+  2. **In-process bridle multi-step turn (`MaxSteps > 1`) with the default
+     provider.** Same dependency as v1 (DeepSeek/openai-api). Useful when
+     Claude Code isn't installed or when operators want zero-subprocess
+     deployment. Cheaper per token, less capable than Claude Code for
+     multi-step reasoning over messy pages.
+  3. **ACP to an external agent over PTY/JSON-RPC.** Agent-portable
+     (Claude Code, Gemini CLI, future agents). Heavier than the bridle
+     `claudecode` provider since ACP adds its own session-and-protocol layer
+     on top of what bridle already does. Worth doing if/when "any ACP agent
+     can drive lynxai" becomes a real user request.
+
+  *Per-task tool scoping (all paths).* `POST /drive` accepts a
+  `tools_allowed: ["navigate", "fill_form", "observe", ...]` filter so the
+  headless agent only sees the actions relevant to the task — keeps the tool
+  description token cost down across many short sessions.
+
+  *Tool surface shape for the headless case.* Static tool set with
+  schema-driven inputs: `navigate(url)` returns `{form_schema, links,
+  observed_refs}` in its result; `fill_form` re-uses the most recent schema
+  from the navigate result rather than relying on `tools/list_changed`
+  notifications. Page-shape rides in tool result *data*, not in protocol
+  metadata — fewer moving parts, no MCP-server caching issues, and works
+  identically whether the agent is bridle-claudecode, in-process bridle, or
+  (later) MCP-driven.
 
   *Vault feedback loop:* drive operations can write back into lynxai's
   credential vault on success. The expensive agent run bootstraps a
@@ -536,7 +563,11 @@ These items are explicitly **not in v1** and have their own future specs:
 - **Stealth spec** — anti-detection patches, fingerprint management
 - **Proxies spec** — per-request and per-context proxy configuration
 - **CLI spec** — `lynxai browse <url>` interactive lynx-style frontend
-- **MCP spec** — `nexus-web-mcp` wrapper exposing lynxai to nexus aspects
+- **MCP spec** — `nexus-web-mcp` wrapper exposing lynxai to nexus aspects and
+  to third-party MCP clients (Claude Desktop, Cline, etc.). Lower priority
+  than the drive-endpoint spec because most of our own usage is headless
+  Claude Code via bridle, which doesn't need MCP. Build MCP for the "anyone
+  else's agent" story, not for our own.
 
 Each will be its own design doc when its turn comes. v1's job is to make sure
 the engine, creds, and extract boxes have boundaries clean enough that those
