@@ -28,6 +28,14 @@ and streaming. lynxai's `extract` runs as a single-turn bridle invocation with
 the caller's schema as the tool input schema — bridle handles provider
 selection, credentials, retries, and cost accounting.
 
+**Default provider is DeepSeek**, accessed via bridle's `openai-api` provider
+pointed at `https://api.deepseek.com` with model `deepseek-chat`. Cheap,
+effective, OpenAI-API-compatible — the right default for an OSS project whose
+users may not have a Claude or OpenAI subscription. Operators override via
+bridle config to use `claude-api`, local `ollama`, or any other bridle
+provider. This also keeps the Docker quickstart story to one env var
+(`LYNXAI_LLM_API_KEY`) — drop in a DeepSeek key, you're running.
+
 This document specifies **v1 only**. v1 is deliberately minimal: enough to be
 useful for the most common agent task (fetch a page, optionally authenticated,
 optionally extract structured data) and no more. The rest is scoped on top in
@@ -52,7 +60,22 @@ These belong to later specs and are explicitly out of scope here:
 
 ## v1 deliverable
 
-A single Go static binary, `lynxai`, with one subcommand that matters:
+Two artifacts, same source:
+
+1. **Single Go static binary** `lynxai` (Linux/macOS/Windows) — for self-hosters
+   comfortable with Go binaries
+2. **Docker image** `ghcr.io/carriedworlduniverse/lynxai:<version>` — bundles
+   the binary plus a pinned Chromium, so non-technical operators only need to
+   choose a provider and supply an API key:
+
+   ```
+   docker run -d -p 7878:7878 \
+     -e LYNXAI_LLM_API_KEY=sk-... \
+     -v lynxai-data:/data \
+     ghcr.io/carriedworlduniverse/lynxai:latest
+   ```
+
+The CLI in both cases has one subcommand that matters in v1:
 
 ```
 lynxai serve --addr :7878 --data-dir ~/.lynxai
@@ -191,7 +214,8 @@ JSON that conforms to the schema, extracted from the page content.
     caller's JSON Schema verbatim. The model is told to call this tool once.
   - `Provider` / `Model`: read from the bridle config passed in at server
     start (see "bridle dependency" below) — lynxai does not duplicate
-    provider/model flags. Bridle's defaults apply if unset.
+    provider/model flags. Default bridle config: provider `openai-api`,
+    base URL `https://api.deepseek.com`, model `deepseek-chat`.
   - `MaxSteps`: 1 (one tool round; no agentic loop in extract)
 - Call `bridle.Harness.RunTurn`. The model's tool call carries the structured
   JSON matching the schema — bridle's provider layer guarantees the call shape
@@ -228,6 +252,12 @@ managed by the lynxai vault — bridle owns provider credentials. lynxai's
 file (or `LYNXAI_BRIDLE_CONFIG` env), and passes it through. Bridle's existing
 credential handling does the rest, which means lynxai inherits whatever
 providers bridle supports without code changes here.
+
+For the zero-config Docker path, lynxai synthesizes a default bridle config
+when none is supplied: provider `openai-api`, base URL `https://api.deepseek.com`,
+model `deepseek-chat`, API key from `LYNXAI_LLM_API_KEY`. Override any field
+by supplying a real bridle config; the synthesis is purely a quickstart
+convenience.
 
 ### `internal/creds` — encrypted credential vault
 
@@ -413,7 +443,7 @@ don't run by default — they need Chromium and network):
 - Form login flow against `httptest.Server` simulating a login endpoint
 - Extract against a fixture page with a small schema, asserting the JSON shape
   (bridle uses a real provider — `ollama-local` if available, falling back to
-  `claude-api` gated by env var, skipped without either)
+  DeepSeek via `openai-api` gated by `LYNXAI_LLM_API_KEY`, skipped without either)
 
 **No** end-to-end tests against live third-party sites in v1 — they're flaky and
 make CI a liability.
@@ -443,9 +473,6 @@ specs add new packages and endpoints rather than rewriting these ones.
 
 ## Open questions (none blocking v1)
 
-- Do we ship a Docker image alongside the binary release in v1? (Probably yes,
-  for self-hosters who'd rather `docker run` than manage Go installs. Single
-  Dockerfile, ~20 lines.) Decide before first release, not now.
 - Master-key rotation story — not v1, but should be designed before the vault
   has long-lived production data in it. Add a key-rotation spec when there's a
   user who needs it.
