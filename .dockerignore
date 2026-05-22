@@ -1,0 +1,9 @@
+.git
+*.db
+*.db-journal
+master.key
+.lynxai/
+dist/
+docs/
+*.md
+!README.md
