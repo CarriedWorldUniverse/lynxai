@@ -1,0 +1,50 @@
+version: 2
+
+project_name: lynxai
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: lynxai
+    main: ./cmd/lynxai
+    binary: lynxai
+    env: [CGO_ENABLED=0]
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    ldflags:
+      - -s -w
+      - -X github.com/CarriedWorldUniverse/lynxai/internal/version.Version={{.Version}}
+
+archives:
+  - id: lynxai
+    builds: [lynxai]
+    name_template: 'lynxai_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+    format: tar.gz
+    files: [README*, LICENSE*]
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  version_template: '{{ incpatch .Version }}-next'
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - Merge pull request
+      - Merge branch
+
+release:
+  github:
+    owner: CarriedWorldUniverse
+    name: lynxai
+  draft: false
+  prerelease: auto
+  name_template: '{{ .ProjectName }} {{ .Tag }}'

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync"
 	"testing"
 )
@@ -24,7 +25,10 @@ func TestLoadOrCreateMasterKey_CreatesOnFirstRun(t *testing.T) {
 	if err != nil {
 		t.Fatalf("stat: %v", err)
 	}
-	if info.Mode().Perm() != 0o600 {
+	// Windows doesn't honor unix perm bits — os.FileInfo.Mode().Perm() reports
+	// 0666 regardless of what WriteFile/Chmod requested. The 0600 contract still
+	// holds on the OSes where it matters (linux, darwin, docker target).
+	if runtime.GOOS != "windows" && info.Mode().Perm() != 0o600 {
 		t.Errorf("perms = %o, want 0600", info.Mode().Perm())
 	}
 
