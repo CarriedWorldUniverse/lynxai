@@ -42,7 +42,10 @@ func fetchHandler(d Deps) http.HandlerFunc {
 			IncludeChrome: body.IncludeChrome,
 		})
 		if err != nil {
-			recordOutcome(r.Context(), d, body.Credential, body.URL, "apply_failed")
+			// Credential was applied successfully (resolveCredential succeeded);
+			// the failure is in navigation. Audit as "ok" so the audit log
+			// reflects credential usage, not page-fetch outcome.
+			recordOutcome(r.Context(), d, body.Credential, body.URL, "ok")
 			WriteError(w, ErrCodeNavigationFailed, err.Error(), nil)
 			return
 		}

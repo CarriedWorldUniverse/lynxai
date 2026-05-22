@@ -36,8 +36,15 @@ func Synthesize(path string) (*Config, error) {
 	}, nil
 }
 
-// loadFile parses a bridle config file. v1 only supports the env-default path;
-// file loading is deferred to a later spec.
+// loadFile parses a bridle config file. File-based config loading is deferred
+// to a later spec. v1 only supports the default-from-env path (no flag).
+//
+// If you reach this function, you passed --bridle-config or LYNXAI_BRIDLE_CONFIG.
+// In v1, omit the flag and set LYNXAI_LLM_API_KEY instead.
 func loadFile(path string) (*Config, error) {
-	return nil, fmt.Errorf("bridle config file loading: not yet implemented (use LYNXAI_LLM_API_KEY for default DeepSeek)")
+	return nil, fmt.Errorf(
+		"--bridle-config / LYNXAI_BRIDLE_CONFIG is not supported in v1 "+
+			"(got path %q). Omit the flag and set LYNXAI_LLM_API_KEY for the default DeepSeek config; "+
+			"file-based bridle config is planned for a later release.",
+		path)
 }

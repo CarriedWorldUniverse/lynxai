@@ -24,7 +24,7 @@ func runServe(args []string) error {
 	fs := flag.NewFlagSet("serve", flag.ExitOnError)
 	addr := fs.String("addr", "127.0.0.1:7878", "address to bind")
 	dataDir := fs.String("data-dir", defaultDataDir(), "directory for master.key and lynxai.db")
-	bridleCfg := fs.String("bridle-config", os.Getenv("LYNXAI_BRIDLE_CONFIG"), "path to bridle config (empty => synthesize default from LYNXAI_LLM_API_KEY)")
+	bridleCfg := fs.String("bridle-config", os.Getenv("LYNXAI_BRIDLE_CONFIG"), "path to bridle config [v1: not yet supported — set LYNXAI_LLM_API_KEY for DeepSeek default]")
 	_ = fs.Parse(args)
 
 	if err := os.MkdirAll(*dataDir, 0o700); err != nil {

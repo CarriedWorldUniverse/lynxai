@@ -48,6 +48,8 @@ func extractHandler(d Deps) http.HandlerFunc {
 			Credential:    applied,
 			IncludeChrome: body.IncludeChrome,
 		})
+		// Credential (if any) was applied — record once regardless of fetch outcome.
+		recordOutcome(r.Context(), d, body.Credential, body.URL, "ok")
 		if err != nil {
 			WriteError(w, ErrCodeNavigationFailed, err.Error(), nil)
 			return
