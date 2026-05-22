@@ -484,9 +484,30 @@ These items are explicitly **not in v1** and have their own future specs:
   multi-step browsing. Naturally implemented as a bridle multi-step turn
   (`MaxSteps > 1`) where each step's tools are lynxai actions
 - **Drive endpoint spec** — `POST /drive { goal, tools, credential? }`: a
-  bridle turn whose tool surface is lynxai's own actions. The endpoint where
-  "we drive it via AI" becomes a first-class operation rather than something
-  the caller assembles
+  multi-step agent loop whose tool surface is lynxai's own actions. The
+  endpoint where "we drive it via AI" becomes a first-class operation rather
+  than something the caller assembles.
+
+  *Motivating example:* "log into Atlassian, navigate to API tokens, generate
+  a new one named 'lynxai-prod', return the token and store it in the vault
+  as credential `jira-prod`." A multi-page click-and-extract task that a
+  one-shot LLM call can't do but a real agent loop handles cleanly.
+
+  *Front-end options to evaluate in that spec:* (a) in-process bridle
+  multi-step turn (`MaxSteps > 1`) — same dependency as v1, no new processes;
+  (b) ACP to an external agent (Claude Code, Gemini CLI) over PTY/JSON-RPC —
+  reuses a mature agent loop, pluggable across agent vendors, but adds a
+  subprocess and a subscription-style auth surface to the deployment story.
+  Both are viable; the choice depends on whether operators want a
+  zero-subprocess deployment (favor bridle) or an agent-portable one
+  (favor ACP). May ship both.
+
+  *Vault feedback loop:* drive operations can write back into lynxai's
+  credential vault on success. The expensive agent run bootstraps a
+  credential once; thereafter cheap deterministic `fetch`/`extract` calls
+  reuse it. This is the main reason vault writes need a structured "this
+  came from drive run X" provenance field — design that into the drive spec,
+  not v1.
 - **Stealth spec** — anti-detection patches, fingerprint management
 - **Proxies spec** — per-request and per-context proxy configuration
 - **CLI spec** — `lynxai browse <url>` interactive lynx-style frontend
