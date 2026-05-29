@@ -34,11 +34,13 @@ type ExtractRequest struct {
 // Extractor runs schema-driven extractions through a bridle Turner.
 type Extractor struct {
 	turner Turner
+	model  string
 }
 
-// NewExtractor wraps a Turner.
-func NewExtractor(t Turner) *Extractor {
-	return &Extractor{turner: t}
+// NewExtractor wraps a Turner. model is the bridle model id requested on every
+// turn — bridle requires TurnRequest.Model to be set.
+func NewExtractor(t Turner, model string) *Extractor {
+	return &Extractor{turner: t, model: model}
 }
 
 // Extract drives a single bridle turn against the given page + schema and
@@ -46,6 +48,7 @@ func NewExtractor(t Turner) *Extractor {
 func (e *Extractor) Extract(ctx context.Context, req ExtractRequest) (json.RawMessage, error) {
 	turnReq := bridle.TurnRequest{
 		AspectID:           "lynxai-extract",
+		Model:              e.model,
 		AppendSystemPrompt: extractSystemPrompt,
 		UserMessage:        req.PageMarkdown,
 		Tools: []bridle.ToolDef{

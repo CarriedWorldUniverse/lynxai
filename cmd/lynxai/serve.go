@@ -59,7 +59,7 @@ func runServe(args []string) error {
 	router := api.NewRouter(api.Deps{
 		Vault:     vault,
 		Engine:    eng,
-		Extractor: extract.NewExtractor(harness),
+		Extractor: extract.NewExtractor(harness, cfg.Model),
 		Forms:     engine.NewFormLoginCache(),
 	})
 

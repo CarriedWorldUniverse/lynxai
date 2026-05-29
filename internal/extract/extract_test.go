@@ -36,7 +36,7 @@ func TestExtract_HappyPath(t *testing.T) {
 		},
 	}
 
-	ex := NewExtractor(ft)
+	ex := NewExtractor(ft, "test-model")
 	got, err := ex.Extract(context.Background(), ExtractRequest{
 		PageMarkdown: "# title\n\nN is 42.",
 		Schema:       schema,
@@ -64,6 +64,9 @@ func TestExtract_HappyPath(t *testing.T) {
 	if ft.gotReq.MaxSteps != 1 {
 		t.Errorf("MaxSteps = %d, want 1", ft.gotReq.MaxSteps)
 	}
+	if ft.gotReq.Model != "test-model" {
+		t.Errorf("Model = %q, want %q (bridle requires TurnRequest.Model)", ft.gotReq.Model, "test-model")
+	}
 }
 
 func TestExtract_NoToolCallIsError(t *testing.T) {
@@ -71,7 +74,7 @@ func TestExtract_NoToolCallIsError(t *testing.T) {
 	ft := &fakeTurner{
 		result: bridle.TurnResult{ToolCalls: nil},
 	}
-	ex := NewExtractor(ft)
+	ex := NewExtractor(ft, "test-model")
 	_, err := ex.Extract(context.Background(), ExtractRequest{
 		PageMarkdown: "stuff",
 		Schema:       schema,
@@ -90,7 +93,7 @@ func TestExtract_ValidationFailureBubblesUp(t *testing.T) {
 			},
 		},
 	}
-	ex := NewExtractor(ft)
+	ex := NewExtractor(ft, "test-model")
 	_, err := ex.Extract(context.Background(), ExtractRequest{
 		PageMarkdown: "stuff",
 		Schema:       schema,
