@@ -27,7 +27,7 @@ func (s *stubTurner) RunTurn(ctx context.Context, req bridle.TurnRequest, runner
 
 func TestExtract_HandlerWiresEverything(t *testing.T) {
 	eng := &stubEngine{res: &engine.FetchResult{Markdown: "# Hello\nname: alice", Status: 200}}
-	xtr := extract.NewExtractor(&stubTurner{emit: json.RawMessage(`{"name":"alice"}`)})
+	xtr := extract.NewExtractor(&stubTurner{emit: json.RawMessage(`{"name":"alice"}`)}, "test-model")
 
 	dir := t.TempDir()
 	key, _ := creds.LoadOrCreateMasterKey(filepath.Join(dir, "master.key"))
