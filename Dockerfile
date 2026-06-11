@@ -9,6 +9,9 @@ RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/lynxai ./cmd/lynxa
 
 FROM chromedp/headless-shell:latest
 # headless-shell ships a Chromium-equivalent binary; chromedp finds it on PATH.
+# It has no system CA bundle though — Chromium carries its own, but the Go
+# binary (bridle → LLM provider over TLS) needs one. Take the build stage's.
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=build /out/lynxai /usr/local/bin/lynxai
 ENV LYNXAI_DATA_DIR=/data
 VOLUME /data
